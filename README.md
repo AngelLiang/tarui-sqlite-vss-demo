@@ -13,6 +13,7 @@ tauri-app使用sqlite-vss示例
 ## 准备工作
 
 ```
+brew install libomp
 brew install llvm
 ```
 
