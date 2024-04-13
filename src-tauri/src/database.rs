@@ -1,10 +1,11 @@
-use rusqlite::{Connection};
 use tauri::AppHandle;
-use rusqlite::{ffi::sqlite3_auto_extension};
+use rusqlite::Connection;
+use rusqlite::ffi::sqlite3_auto_extension;
 use sqlite_vss::{sqlite3_vector_init, sqlite3_vss_init};
-use std::iter;
+
 
 pub fn initialize_database(app_handle: &AppHandle) -> Result<Connection, rusqlite::Error> {
+    // 加载sqlite-vss
     unsafe {
         sqlite3_auto_extension(Some(sqlite3_vector_init));
         sqlite3_auto_extension(Some(sqlite3_vss_init));
@@ -60,7 +61,7 @@ pub fn add_vector(db: &Connection) -> Result<String, rusqlite::Error> {
     let mut vec_str = String::new();
     vec_str.push_str("[");
     for (rowid, distance) in result {
-        // println!("rowid={rowid}, distance={distance}");
+        println!("rowid={rowid}, distance={distance}");
         vec_str.push_str(format!("rowid={rowid}, distance={distance} ").as_str());
     }
     vec_str.push_str("]");
