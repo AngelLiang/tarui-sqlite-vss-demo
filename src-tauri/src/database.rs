@@ -2,17 +2,37 @@ use tauri::AppHandle;
 use rusqlite::Connection;
 use rusqlite::ffi::sqlite3_auto_extension;
 use sqlite_vss::{sqlite3_vector_init, sqlite3_vss_init};
+use std::fs;
+use anyhow::Result;
+use tempfile::tempdir;
+use crate::simple;
 
 
-pub fn initialize_database(app_handle: &AppHandle) -> Result<Connection, rusqlite::Error> {
+pub fn initialize_database(app_handle: &AppHandle) -> Result<Connection, Box<dyn std::error::Error>> {
     // 加载sqlite-vss
     unsafe {
         sqlite3_auto_extension(Some(sqlite3_vector_init));
         sqlite3_auto_extension(Some(sqlite3_vss_init));
     }
 
+    simple::enable_auto_extension()?;
+
     // 打开数据库
     let db = Connection::open_in_memory()?;
+    // let mut app_dir = app_handle.path_resolver().app_data_dir().expect("The app data directory should exist.");
+    // fs::create_dir_all(&app_dir).expect("The app data directory should be created.");
+    // // 数据库路径
+    // let sqlite_path = app_dir.join("tauri-sqlite-vss-demo.sqlite");
+
+    // // 打开数据库
+    // let mut db: Connection = Connection::open(sqlite_path).map_err(|e| {
+    //     println!("{}", e);
+    //     e
+    // })?;
+
+    let dir = tempdir()?;
+    simple::release_dict(&dir)?;
+    simple::set_dict(&db, &dir)?;
 
     let version = get_version(&db);
     // println!("{}", version);
@@ -29,6 +49,17 @@ pub fn initialize_database(app_handle: &AppHandle) -> Result<Connection, rusqlit
     ",
     )?;
 
+    // 创建全文索引
+    db.execute_batch("
+        CREATE VIRTUAL TABLE d USING fts5(id, text, tokenize = 'simple');
+        INSERT INTO d (id, text) VALUES (1, '中华人民共和国国歌');
+        INSERT INTO d (id, text) VALUES (2, '周杰伦');
+    ")?;
+
+    let result = db.query_row("SELECT id FROM d WHERE text MATCH jieba_query('中华国歌')", [], |row| row.get::<_, i64>(0))?;
+    println!("{}", result);
+    let result = db.query_row("SELECT id FROM d WHERE text MATCH simple_query('zhoujiel')", [], |row| row.get::<_, i64>(0))?;
+    println!("{}", result);
 
     Ok(db)
 }

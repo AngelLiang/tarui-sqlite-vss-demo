@@ -3,6 +3,8 @@
 
 mod database;
 mod state;
+mod ffi;
+mod simple;
 
 use state::{AppState, ServiceAccess};
 use tauri::{State, Manager, AppHandle};

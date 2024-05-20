@@ -1,0 +1,6 @@
+[submodule "simple"]
+	path = simple
+	url = https://github.com/wangfenjin/simple
+[submodule "cppjieba"]
+	path = cppjieba
+	url = https://github.com/yanyiwu/cppjieba
