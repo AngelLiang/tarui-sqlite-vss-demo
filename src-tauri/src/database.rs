@@ -7,6 +7,13 @@ use anyhow::Result;
 use rusqlite::params;
 use crate::ffi::sqlite3_simple_init;
 
+pub fn get_db_version(db: &Connection) -> Result<String, rusqlite::Error> {
+    db.query_row(
+        "SELECT sqlite_version()",
+        params![],
+        |row| row.get(0),
+    )
+}
 
 pub fn initialize_database(app_handle: &AppHandle) -> Result<Connection, Box<dyn std::error::Error>> {
     // 加载sqlite-vss
@@ -32,6 +39,11 @@ pub fn initialize_database(app_handle: &AppHandle) -> Result<Connection, Box<dyn
         e
     })?;
 
+    let version = get_db_version(&db)?;
+    println!("SQLite version is {}", version);
+    let version = get_version(&db)?;
+    println!("sqlite-vss version is {}", version);
+
     // 获取jieba的路径
     let jieba_dict_path = app_handle.path_resolver()
         .resolve_resource("jieba")
@@ -40,8 +52,7 @@ pub fn initialize_database(app_handle: &AppHandle) -> Result<Connection, Box<dyn
     log::debug!("jieba_dict_path: {}", jieba_dict_path);
     db.query_row("SELECT jieba_dict(?)", params![jieba_dict_path], |_| Ok(()));
 
-    let version = get_version(&db);
-    // println!("{}", version);
+
 
     // 创建向量数据表
     db.execute_batch(
