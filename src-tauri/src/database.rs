@@ -4,18 +4,19 @@ use rusqlite::ffi::sqlite3_auto_extension;
 use sqlite_vss::{sqlite3_vector_init, sqlite3_vss_init};
 use std::fs;
 use anyhow::Result;
-use tempfile::tempdir;
-use crate::simple;
+use rusqlite::params;
+use crate::ffi::sqlite3_simple_init;
 
 
 pub fn initialize_database(app_handle: &AppHandle) -> Result<Connection, Box<dyn std::error::Error>> {
     // 加载sqlite-vss
-    unsafe {
+    let res = unsafe {
         sqlite3_auto_extension(Some(sqlite3_vector_init));
         sqlite3_auto_extension(Some(sqlite3_vss_init));
-    }
 
-    simple::enable_auto_extension()?;
+        // simple
+        sqlite3_auto_extension(Some(sqlite3_simple_init))
+    };
 
     // 打开数据库
     let db = Connection::open_in_memory()?;
@@ -30,9 +31,13 @@ pub fn initialize_database(app_handle: &AppHandle) -> Result<Connection, Box<dyn
     //     e
     // })?;
 
-    let dir = tempdir()?;
-    simple::release_dict(&dir)?;
-    simple::set_dict(&db, &dir)?;
+    // 获取jieba的路径
+    let jieba_dict_path = app_handle.path_resolver()
+        .resolve_resource("jieba")
+        .map(|path_buf| path_buf.to_str().unwrap_or("").to_owned()) // 修改这里
+        .unwrap_or("".to_owned()); // 这里也做相应修改，确保返回String类型
+    log::debug!("jieba_dict_path: {}", jieba_dict_path);
+    db.query_row("SELECT jieba_dict(?)", params![jieba_dict_path], |_| Ok(()));
 
     let version = get_version(&db);
     // println!("{}", version);

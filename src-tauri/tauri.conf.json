@@ -28,6 +28,13 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
+      "resources": [
+        "jieba/jieba.dict.utf8",
+        "jieba/user.dict.utf8",
+        "jieba/hmm_model.utf8",
+        "jieba/idf.utf8",
+        "jieba/stop_words.utf8"
+      ],
       "macOS": {
         "frameworks": [
           "./libs/x86_64/libomp.dylib"

@@ -4,10 +4,11 @@
 mod database;
 mod state;
 mod ffi;
-mod simple;
 
 use state::{AppState, ServiceAccess};
 use tauri::{State, Manager, AppHandle};
+use rusqlite::params;
+
 
 // 这是一个宏，用于将 greet 函数转换为 Tauri 可以通过其前端框架调用的命令。
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -15,6 +16,9 @@ use tauri::{State, Manager, AppHandle};
 fn greet(app_handle: AppHandle, name: &str) -> String {
     // Should handle errors instead of unwrapping here
     let result = app_handle.db(|db| database::add_vector(db)).unwrap();
+    let did: i64 = app_handle.db(|db| db.query_row("SELECT id FROM d WHERE text MATCH simple_query(?)", params![name], |row| row.get::<_, i64>(0))
+    ).unwrap_or(-1);
+    println!("did={}", did);
     format!("sqlite-vss: {}", result)
 }
 
