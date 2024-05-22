@@ -23,26 +23,26 @@ fn build_simple() {
 
     let manifest_dir = env!("CARGO_MANIFEST_DIR"); // 获取Cargo.toml所在目录的路径
 
-    cfg.include(format!("{}/../simple/src", manifest_dir));
-    cfg.file(format!("{}/../simple/src/pinyin.h", manifest_dir));
-    cfg.file(format!("{}/../simple/src/simple_highlight.h", manifest_dir));
-    cfg.file(format!("{}/../simple/src/simple_tokenizer.h", manifest_dir));
-    cfg.file(format!("{}/../simple/src/pinyin.cc", manifest_dir));
-    cfg.file(format!("{}/../simple/src/simple_highlight.cc", manifest_dir));
-    cfg.file(format!("{}/../simple/src/simple_tokenizer.cc", manifest_dir));
-    cfg.file(format!("{}/../simple/src/entry.cc", manifest_dir));
+    cfg.include(format!("{}/../third-party/simple/src", manifest_dir));
+    cfg.file(format!("{}/../third-party/simple/src/pinyin.h", manifest_dir));
+    cfg.file(format!("{}/../third-party/simple/src/simple_highlight.h", manifest_dir));
+    cfg.file(format!("{}/../third-party/simple/src/simple_tokenizer.h", manifest_dir));
+    cfg.file(format!("{}/../third-party/simple/src/pinyin.cc", manifest_dir));
+    cfg.file(format!("{}/../third-party/simple/src/simple_highlight.cc", manifest_dir));
+    cfg.file(format!("{}/../third-party/simple/src/simple_tokenizer.cc", manifest_dir));
+    cfg.file(format!("{}/../third-party/simple/src/entry.cc", manifest_dir));
 
-    cfg.include(format!("{}/../simple/contrib/sqlite3", manifest_dir));
+    cfg.include(format!("{}/../third-party/simple/contrib/sqlite3", manifest_dir));
 
-    cfg.include(format!("{}/../cmrc/include", manifest_dir));
-    cfg.file(format!("{}/../cmrc/pinyin.txt/lib.cpp", manifest_dir));
-    cfg.file(format!("{}/../cmrc/pinyin.txt/pinyin.txt.cpp", manifest_dir));
+    cfg.include(format!("{}/../third-party/cmrc/include", manifest_dir));
+    cfg.file(format!("{}/../third-party/cmrc/pinyin.txt/lib.cpp", manifest_dir));
+    cfg.file(format!("{}/../third-party/cmrc/pinyin.txt/pinyin.txt.cpp", manifest_dir));
 
     if cfg!(feature = "jieba") {
         cfg
             .define("USE_JIEBA", "1")
-            .include(format!("{}/../cppjieba/include", manifest_dir))
-            .include(format!("{}/../cppjieba/deps/limonp/include", manifest_dir));
+            .include(format!("{}/../third-party/cppjieba/include", manifest_dir))
+            .include(format!("{}/../third-party/cppjieba/deps/limonp/include", manifest_dir));
     }
 
     cfg

@@ -1,0 +1,6 @@
+[submodule "third-party/simple"]
+	path = third-party/simple
+	url = https://github.com/wangfenjin/simple
+[submodule "third-party/cppjieba"]
+	path = third-party/cppjieba
+	url = https://github.com/yanyiwu/cppjieba
