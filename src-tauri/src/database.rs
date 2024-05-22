@@ -19,17 +19,18 @@ pub fn initialize_database(app_handle: &AppHandle) -> Result<Connection, Box<dyn
     };
 
     // 打开数据库
-    let db = Connection::open_in_memory()?;
-    // let mut app_dir = app_handle.path_resolver().app_data_dir().expect("The app data directory should exist.");
-    // fs::create_dir_all(&app_dir).expect("The app data directory should be created.");
-    // // 数据库路径
-    // let sqlite_path = app_dir.join("tauri-sqlite-vss-demo.sqlite");
+    // let db = Connection::open_in_memory()?;
 
-    // // 打开数据库
-    // let mut db: Connection = Connection::open(sqlite_path).map_err(|e| {
-    //     println!("{}", e);
-    //     e
-    // })?;
+    let mut app_dir = app_handle.path_resolver().app_data_dir().expect("The app data directory should exist.");
+    fs::create_dir_all(&app_dir).expect("The app data directory should be created.");
+    // 数据库路径
+    let sqlite_path = app_dir.join("tauri-sqlite-vss-demo.sqlite");
+    fs::remove_file(sqlite_path.as_path().clone())?;
+    // 打开数据库
+    let mut db: Connection = Connection::open(sqlite_path).map_err(|e| {
+        println!("{}", e);
+        e
+    })?;
 
     // 获取jieba的路径
     let jieba_dict_path = app_handle.path_resolver()
@@ -59,6 +60,18 @@ pub fn initialize_database(app_handle: &AppHandle) -> Result<Connection, Box<dyn
         CREATE VIRTUAL TABLE d USING fts5(id, text, tokenize = 'simple');
         INSERT INTO d (id, text) VALUES (1, '中华人民共和国国歌');
         INSERT INTO d (id, text) VALUES (2, '周杰伦');
+        INSERT INTO d (id, text) VALUES (3, '周润发');
+    ")?;
+    // db.execute_batch("
+    //     BEGIN;
+    //     DELETE FROM d WHERE id = 3;
+    //     INSERT INTO d (id, text) VALUES (3, '成龙');
+    //     COMMIT;
+    // ")?;
+    db.execute_batch("
+        UPDATE d
+        SET text = '成龙'
+        WHERE id = 3;
     ")?;
 
     let result = db.query_row("SELECT id FROM d WHERE text MATCH jieba_query('中华国歌')", [], |row| row.get::<_, i64>(0))?;
@@ -70,6 +83,8 @@ pub fn initialize_database(app_handle: &AppHandle) -> Result<Connection, Box<dyn
     println!("{}", result);
 
     let result = db.query_row("SELECT id FROM d WHERE text MATCH simple_query('zhoujiel')", [], |row| row.get::<_, i64>(0))?;
+    println!("{}", result);
+    let result = db.query_row("SELECT simple_highlight(d, 1, '[', ']') as text FROM d WHERE text MATCH jieba_query('chen')", [], |row| row.get::<_, String>(0))?;
     println!("{}", result);
 
     Ok(db)
