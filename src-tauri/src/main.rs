@@ -16,9 +16,9 @@ use rusqlite::params;
 fn greet(app_handle: AppHandle, name: &str) -> String {
     // Should handle errors instead of unwrapping here
     let result = app_handle.db(|db| database::add_vector(db)).unwrap();
-    let did: i64 = app_handle.db(|db| db.query_row("SELECT id FROM d WHERE text MATCH simple_query(?)", params![name], |row| row.get::<_, i64>(0))
-    ).unwrap_or(-1);
-    println!("did={}", did);
+    let text = app_handle.db(|db| db.query_row("SELECT simple_highlight(d, 1, '[', ']') FROM d WHERE text MATCH simple_query(?)", params![name], |row| row.get::<_, String>(0))
+    ).unwrap_or("".to_string());
+    println!("text={}", text);
     format!("sqlite-vss: {}", result)
 }
 

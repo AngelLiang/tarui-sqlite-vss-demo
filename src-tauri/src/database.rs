@@ -63,6 +63,12 @@ pub fn initialize_database(app_handle: &AppHandle) -> Result<Connection, Box<dyn
 
     let result = db.query_row("SELECT id FROM d WHERE text MATCH jieba_query('中华国歌')", [], |row| row.get::<_, i64>(0))?;
     println!("{}", result);
+    let result = db.query_row("SELECT simple_highlight(d, 1, '[', ']') as text FROM d WHERE text MATCH jieba_query('中华国歌')", [], |row| {
+        // println!("{}", row.get(1));
+        row.get::<_, String>(0)
+    })?;
+    println!("{}", result);
+
     let result = db.query_row("SELECT id FROM d WHERE text MATCH simple_query('zhoujiel')", [], |row| row.get::<_, i64>(0))?;
     println!("{}", result);
 
