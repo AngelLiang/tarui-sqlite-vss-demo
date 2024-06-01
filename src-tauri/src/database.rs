@@ -29,6 +29,16 @@ pub fn initialize_database(app_handle: &AppHandle) -> Result<Connection, rusqlit
     ",
     )?;
 
+    println!("判断rowid是否存在");
+    let result= db.prepare(
+        r"
+            SELECT EXISTS(SELECT 1 FROM vss_demo WHERE rowid=?);
+        ",
+        )?.query_row([6], |r| {
+            let is_exists: bool = r.get(0)?;
+            Ok(is_exists)
+    })?;
+    println!("result: {}", result);
 
     Ok(db)
 }
